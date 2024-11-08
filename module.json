@@ -1,11 +1,11 @@
 {
+    "name": "ryan-premades",
     "id": "ryan-premades",
     "title": "Ryan Premades",
-    "authors": [
-        {
-            "name": "Ryan Comer"
-        }
-    ],
+    "description": "A collection of scripts that will automate custom items, regalias, classes and other features.",
+    "authors": [{
+        "name": "Ryan Comer"
+    }],
     "version": "0.1.0",
     "esmodules": [
         "scripts/module.js"
