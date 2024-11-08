@@ -1,0 +1,13 @@
+{
+    "id": "ryan-premades",
+    "title": "Ryan Premades",
+    "authors": [
+        {
+            "name": "Ryan Comer"
+        }
+    ],
+    "version": "0.1.0",
+    "esmodules": [
+        "scripts/module.js"
+    ]
+}
