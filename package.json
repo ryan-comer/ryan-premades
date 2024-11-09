@@ -1,0 +1,14 @@
+{
+    "name": "ryan-premades",
+    "version": "0.1.0",
+    "description": "A collection of scripts that will automate custom items, regalias, classes and other features.",
+    "scripts": {
+        "buildCompendiums": "node packs/packData.mjs"
+    },
+    "dependencies": {
+        "@foundryvtt/foundryvtt-cli": "^1.0.2",
+        "terser-webpack-plugin": "^5.3.9",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4"
+    }
+}

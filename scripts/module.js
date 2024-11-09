@@ -5,7 +5,9 @@ Hooks.on("init", function() {
 })
 
 Hooks.on("ready", function() {
+    /*
     if (!game.items.some(item => item.name === santana_regalia_0.feat.name)) {
         Item.create(santana_regalia_0.feat)
     }
+    */
 })

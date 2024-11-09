@@ -1,14 +1,37 @@
 {
-    "name": "ryan-premades",
     "id": "ryan-premades",
     "title": "Ryan Premades",
-    "description": "<p>A collection of scripts that will automate custom items, regalias, classes and other features.</p>",
+    "description": "A collection of scripts that will automate custom items, regalias, classes and other features.",
     "authors": [{
         "name": "Ryan Comer"
     }],
     "version": "0.1.0",
+    "compatibility": {
+        "minimum": "10",
+        "verified": "11"
+    },
     "esmodules": [
         "scripts/module.js"
+    ],
+    "packFolders": [
+        {
+            "name": "Ryan Premades",
+            "sorting": "a",
+            "color": "#ff0000",
+            "packs": [
+                "Santana"
+            ]
+        }
+    ],
+    "packs": [
+        {
+            "name": "Santana",
+            "label": "Santana Regalia 0",
+            "path": "packs/santana",
+            "module": "ryan-premades",
+            "banner": "modules/ryan-premades/images/orb.webp",
+            "type": "feat"
+        }
     ],
     "manifest": "https://github.com/ryan-comer/ryan-premades/releases/latest/download/module.json",
     "download": "https://github.com/ryan-comer/ryan-premades/archive/refs/tags/V0.1.0.zip"
