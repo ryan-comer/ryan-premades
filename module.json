@@ -13,24 +13,23 @@
     "esmodules": [
         "scripts/module.js"
     ],
+    "packs": [
+        {
+            "name": "santana",
+            "label": "Santana",
+            "path": "packs/santana",
+            "type": "Item",
+            "system": "dnd5e"
+        }
+    ],
     "packFolders": [
         {
             "name": "Ryan Premades",
             "sorting": "a",
-            "color": "#ff0000",
+            "color": "#FF0000",
             "packs": [
-                "Santana"
+                "santana"
             ]
-        }
-    ],
-    "packs": [
-        {
-            "name": "Santana",
-            "label": "Santana Regalia 0",
-            "path": "packs/santana",
-            "module": "ryan-premades",
-            "banner": "modules/ryan-premades/images/orb.webp",
-            "type": "feat"
         }
     ],
     "manifest": "https://github.com/ryan-comer/ryan-premades/releases/latest/download/module.json",

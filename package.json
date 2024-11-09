@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "A collection of scripts that will automate custom items, regalias, classes and other features.",
     "scripts": {
-        "buildCompendiums": "node packs/packData.mjs"
+        "buildCompendiums": "node packData/packData.mjs"
     },
     "dependencies": {
         "@foundryvtt/foundryvtt-cli": "^1.0.2",
