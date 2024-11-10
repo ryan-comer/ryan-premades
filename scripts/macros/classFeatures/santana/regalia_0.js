@@ -7,7 +7,7 @@ import {
 // Generate an orb for every N damage done
 // At the end of the turn, spend the orbs for a bonus effect
 
-export const feat = {
+const feat = {
   "name": "Santana Regalia 0",
   "type": "feat",
   "img": "modules/ryan-premades/images/santana/orb.webp"

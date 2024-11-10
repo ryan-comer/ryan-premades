@@ -1,7 +1,9 @@
 import * as santana_regalia_0 from "./macros/classFeatures/santana/regalia_0.js"
+import * as kaldor_regalia_0 from "./macros/classFeatures/kaldor/regalia_0.js"
 
 Hooks.on("init", function() {
     santana_regalia_0.init()
+    kaldor_regalia_0.init()
 })
 
 Hooks.on("ready", function() {

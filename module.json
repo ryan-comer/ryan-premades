@@ -5,10 +5,10 @@
     "authors": [{
         "name": "Ryan Comer"
     }],
-    "version": "0.1.0",
+    "version": "0.1.1",
     "compatibility": {
         "minimum": "10",
-        "verified": "11"
+        "verified": "15"
     },
     "esmodules": [
         "scripts/module.js"
@@ -20,6 +20,13 @@
             "path": "packs/santana",
             "type": "Item",
             "system": "dnd5e"
+        },
+        {
+            "name": "kaldor",
+            "label": "Kaldor",
+            "path": "packs/kaldor",
+            "type": "Item",
+            "system": "dnd5e"
         }
     ],
     "packFolders": [
@@ -28,7 +35,8 @@
             "sorting": "a",
             "color": "#FF0000",
             "packs": [
-                "santana"
+                "santana",
+                "kaldor"
             ]
         }
     ],

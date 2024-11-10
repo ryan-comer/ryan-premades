@@ -1,6 +1,7 @@
 import {compilePack, extractPack} from '@foundryvtt/foundryvtt-cli';
 let itemPacks = [
-    'santana'
+    'santana',
+    'kaldor'
 ];
 let actorPacks = []
 for (let i of itemPacks) {
