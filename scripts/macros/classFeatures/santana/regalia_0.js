@@ -197,6 +197,10 @@ function updateOrbs(actor, numOrbs) {
 export function init() {
   // Track the damage from a roll
   Hooks.on("midi-qol.RollComplete", workflow => {
+    // Check if the token is in combat
+    const token = workflow.actor.getActiveTokens()[0]
+    if (!token.inCombat) return
+
     const currentDamage = trackDamage(workflow)
     console.log("Current Damage: " + currentDamage)
     const numOrbs = getOrbs(currentDamage)
