@@ -25,6 +25,12 @@ async function getNewTempHealth(actor) {
 async function setTempHealth(actor) {
     const token = actor.getActiveTokens()[0]
     const newTempHealth = await getNewTempHealth(actor)
+
+    // Get the current temp health
+    const currentTempHealth = actor.system.attributes.hp.temp
+
+    if (currentTempHealth >= newTempHealth) return
+
     actor.update({
         "system.attributes.hp.temp": newTempHealth
     })
