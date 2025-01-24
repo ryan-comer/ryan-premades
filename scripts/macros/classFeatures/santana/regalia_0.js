@@ -2,6 +2,18 @@ import {
   playerOwnsActor
 } from "../../../utils/players.js"
 
+import {
+  getState,
+  setState,
+} from "../../../utils/state.js"
+
+import {
+  debug,
+  error,
+  info,
+  log
+} from "../../../utils/logging.js"
+
 // Class feature for Santana Regalia 0
 // Track the amount of damage done during the turn by the character who has this feat
 // Generate an orb for every N damage done
@@ -13,20 +25,20 @@ const feat = {
   "img": "modules/ryan-premades/images/santana/orb.webp"
 }
 
+const stateName = "Santana State"
+
 // Check if the feat is active on the actor
 function isActive(actor) {
   return actor.items.some(item => item.name === feat.name)
 }
 
 // Track the damage from a workflow
-function trackDamage(workflow) {
-  if (!isActive(workflow.actor)) return
-
+async function trackDamage(workflow) {
   // Get the damage from the workflow
   const damage = workflow.healingAdjustedDamageTotal
 
   // Get the current damage from the actor
-  const currentDamage = Number(workflow.actor.getFlag("ryan-premades", "damage")) || 0
+  const currentDamage = getDamage(workflow.actor) || 0
 
   // Update the damage
   let newDamage = currentDamage
@@ -34,21 +46,33 @@ function trackDamage(workflow) {
     newDamage = currentDamage + damage
   }
 
-  workflow.actor.setFlag("ryan-premades", "damage", newDamage)
+  await updateDamage(workflow.actor, newDamage)
+
   return newDamage
 }
 
+// Get the damage from an actor
+function getDamage(actor) {
+  return Number(getState(actor, stateName, "damage"))
+}
+
+// Update the damage
+async function updateDamage(actor, damage) {
+  await setState(actor, stateName, "damage", damage)
+}
+
 // Reset the damage
-function resetDamage(actor) {
-  actor.setFlag("ryan-premades", "damage", 0)
+async function resetDamage(actor) {
+  await updateDamage(actor, 0)
 }
 
 // Get the number of orbs from the damage
-function getOrbs(damage) {
-  return Math.floor(damage / 10)
+function getOrbs(actor, damage) {
+  // Cap number of orbs at the proficiency bonus
+  return Math.min(Math.floor(damage / 10), actor.system.attributes.prof)
 }
 
-async function damage(actor, numOrbs) {
+async function damageBuff(actor, numOrbs) {
   const attackBonus = numOrbs
   const damageBonus = numOrbs * 2
 
@@ -85,12 +109,16 @@ async function damage(actor, numOrbs) {
 }
 
 async function healing(actor, numOrbs) {
-  const healingAmount = 4 * numOrbs; // The amount of healing to apply
+  let healingAmount = 4 * numOrbs; // The amount of healing to apply
   const token = actor.getActiveTokens()[0]; // The token to apply the healing to
+
+  const maxHealth = actor.system.attributes.hp.effectiveMax
+  healingAmount = Math.min(healingAmount, maxHealth - actor.system.attributes.hp.value)
+
 
   // Apply the healing
   actor.update({
-    "system.attributes.hp.value": Math.min(actor.system.attributes.hp.value + healingAmount, actor.system.attributes.hp.max)
+    "system.attributes.hp.value": actor.system.attributes.hp.value + healingAmount
   });
 
   // Create the healing effect
@@ -118,7 +146,7 @@ function promptUser(actor, numOrbs) {
       option1: {
         label: "Damage",
         callback: () => {
-          damage(actor, numOrbs);
+          damageBuff(actor, numOrbs);
         },
       },
       option2: {
@@ -132,7 +160,7 @@ function promptUser(actor, numOrbs) {
   }).render(true);
 }
 
-function clearOrbs(actor) {
+function clearOrbEffects(actor) {
   for (let i = 0; i < 4; i++) {
     try {
       Sequencer.EffectManager.endEffects({
@@ -146,9 +174,9 @@ function clearOrbs(actor) {
 }
 
 // Update the effect for the orbs
-function updateOrbs(actor, numOrbs) {
+function updateOrbEffects(actor, numOrbs) {
   // Clear existing orbs
-  clearOrbs(actor)
+  clearOrbEffects(actor)
 
   const token = actor.getActiveTokens()[0]
 
@@ -195,21 +223,30 @@ function updateOrbs(actor, numOrbs) {
 
 // Register the hooks
 export function init() {
+  info("Initializing Santana Regalia 0")
   // Track the damage from a roll
-  Hooks.on("midi-qol.RollComplete", workflow => {
+  Hooks.on("midi-qol.RollComplete", async workflow => {
+    debug("Starting RollComplete flow")
+    console.dir(workflow)
+
+    // Check if the actor has the feat
+    if (!isActive(workflow.actor)) return
+
     // Check if the token is in combat
     const token = workflow.actor.getActiveTokens()[0]
     if (!token.inCombat) return
 
-    const currentDamage = trackDamage(workflow)
-    console.log("Current Damage: " + currentDamage)
-    const numOrbs = getOrbs(currentDamage)
-    console.log("Orbs: " + numOrbs)
+    const currentDamage = await trackDamage(workflow)
+    const numOrbs = getOrbs(workflow.actor, currentDamage)
 
-    updateOrbs(workflow.actor, numOrbs)
+    debug(`Current damage: ${currentDamage}, Orbs: ${numOrbs}`)
+    updateOrbEffects(workflow.actor, numOrbs)
   })
 
   Hooks.on("midi-qol.DamageRollComplete", workflow => {
+    debug("Starting DamageRollComplete flow")
+    console.dir(workflow)
+
     // Check if there is a damage effect to remove
     const effectId = workflow.actor.getFlag("ryan-premades", "damageEffectId")
     if (effectId) {
@@ -223,42 +260,62 @@ export function init() {
 
   // Prompt the user on how to spend the orbs at the end of their turn
   Hooks.on("combatTurn", async (combat, turn) => {
+    debug("Starting combatTurn flow")
+    console.dir(combat)
+    console.dir(turn)
+
     let currentTurn = turn.turn
     let previousTurn = turn.turn - 1
 
     const currentActor = combat.turns[currentTurn]?.actor
     const previousActor = previousTurn >= 0 ? combat.turns[previousTurn]?.actor : null
 
+    // Reset orbs if current actor has the feat
+    if (currentActor && isActive(currentActor) && playerOwnsActor(currentActor)) {
+      resetDamage(currentActor)
+      clearOrbEffects(currentActor)
+    }
+
     // Check if the previous turn was the actor with the feat
     if (!previousActor || !isActive(previousActor || !playerOwnsActor(previousActor))) return
 
     // Get the damage from the actor and prompt the user
-    const damage = previousActor.getFlag("ryan-premades", "damage") || 0
-    const numOrbs = getOrbs(damage)
+    const damage = getDamage(previousActor) || 0
+    const numOrbs = getOrbs(previousActor, damage)
     promptUser(previousActor, numOrbs)
 
     // Reset the damage
     resetDamage(previousActor)
-    clearOrbs(previousActor)
+    clearOrbEffects(previousActor)
   })
 
   Hooks.on("combatRound", async (combat, turn) => {
+    debug("Starting combatRound flow")
+    console.dir(combat)
+    console.dir(turn)
+
     let currentTurn = turn.turn
     let previousTurn = combat.turns.length - 1
 
     const currentActor = combat.turns[currentTurn]?.actor
     const previousActor = previousTurn >= 0 ? combat.turns[previousTurn]?.actor : null
 
+    // Reset orbs if current actor has the feat
+    if (currentActor && isActive(currentActor) && playerOwnsActor(currentActor)) {
+      resetDamage(currentActor)
+      clearOrbEffects(currentActor)
+    }
+
     // Check if the previous turn was the actor with the feat
     if (!previousActor || !isActive(previousActor || !playerOwnsActor(previousActor))) return
 
     // Get the damage from the actor and prompt the user
-    const damage = previousActor.getFlag("ryan-premades", "damage") || 0
-    const numOrbs = getOrbs(damage)
+    const damage = getDamage(previousActor) || 0
+    const numOrbs = getOrbs(previousActor, damage)
     promptUser(previousActor, numOrbs)
 
     // Reset the damage
     resetDamage(previousActor)
-    clearOrbs(previousActor)
+    clearOrbEffects(previousActor)
   })
 }
