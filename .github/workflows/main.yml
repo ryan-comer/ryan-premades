@@ -23,7 +23,7 @@ jobs:
       run: npm run buildCompendiums
 
     # create a zip file with all files required by the module to add to the release
-    - run: zip -r ./module.zip module.json packs styles templates images scripts
+    - run: zip -r ./module.zip module.json packs styles templates images scripts effects
     # Create a release for this specific version
     - name: Update Release with Files
       id: create_version_release

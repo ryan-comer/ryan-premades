@@ -208,15 +208,24 @@ function updateOrbEffects(actor, numOrbs) {
   for (let i = 0; i < Math.min(numOrbs, 4); i++) {
     new Sequence()
       .effect()
-      .file(files[i])
-      .attachTo(token.id, {
-        offset: offsets[i]
-      })
-      .scale(0.5)
+      //.file(files[i])
+      .file("modules/ryan-premades/effects/santana_orb_rotate.webm")
+      .anchor({ x: 0.5, y: 0.5 })
+      .persist()
+      .attachTo(token.id)
+      //.scale(0.5)
+      .rotate(90 * i)
       .name(`santana_orb_${i}`)
       .fadeIn(500)
       .fadeOut(500)
-      .duration(100000000)
+      //.duration(100000000)
+      .loopProperty("spriteContainer", "rotation", {
+        from: 0,
+        to: 360,
+        duration: 6000,   // 3 seconds per revolution
+        repeat: Infinity,
+        ease: "linear"
+      })
       .play();
   }
 }

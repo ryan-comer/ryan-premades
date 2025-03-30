@@ -5,7 +5,7 @@
     "authors": [{
         "name": "Ryan Comer"
     }],
-    "version": "0.1.4",
+    "version": "0.1.5",
     "compatibility": {
         "minimum": "10",
         "verified": "15"
